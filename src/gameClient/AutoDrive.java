@@ -28,7 +28,7 @@ import java.util.List;
 
 public class AutoDrive implements Runnable {
 
-    boolean wantsKML = false;
+    //boolean wantsKML = false;
     private KML_Logger kml;
     private Thread t;
     private Graph_Algo ga;
@@ -129,6 +129,7 @@ public class AutoDrive implements Runnable {
             throw new RuntimeException("The number of game you chose is not exist!");
         else {
             this.scenario_num = scenario_num;
+            Game_Server.login(206554685);
             game_service game = Game_Server.getServer(scenario_num);
             this.game = game;
         }
@@ -142,6 +143,7 @@ public class AutoDrive implements Runnable {
         int fruitSize = initFruits();
         int robotSize = initRobots();
         int min = Math.min(fruitSize, robotSize);
+        Iterator<Fruit> fatter = FC.getFC().iterator();
         for (int i = 0; i < min; i++) {
             Fruit f = FC.getFruit(i);
             f.findEdge(this.ga.getG());
@@ -194,7 +196,7 @@ public class AutoDrive implements Runnable {
      */
     private void init() {
         kml = new KML_Logger(this);
-        askKML();
+        //askKML();
 
         StdDraw.setCanvasSize(1000, 650);
 
@@ -355,8 +357,8 @@ public class AutoDrive implements Runnable {
                 JOptionPane.QUESTION_MESSAGE,
                 null, options, options[1]);
         if (n == 0) { //the answer is YES
-            //kml.toKML_file();
-            wantsKML = true;
+            kml.toKML_file();
+            //wantsKML = true;
         }
     }
 
@@ -373,13 +375,13 @@ public class AutoDrive implements Runnable {
             for(String s : game.getFruits()) {
                 System.out.println(s);
                 f.build(s);
-                if(wantsKML) {
+                //if(wantsKML) {
                     if (f.getType() == 1) { //apple
                         kml.placemark(f.getX(), f.getY(), 1);
                     } else { //banana
                         kml.placemark(f.getX(), f.getY(), 2);
                     }
-                }
+                //}
             }
         }
         if (log != null) {
@@ -389,35 +391,43 @@ public class AutoDrive implements Runnable {
                 Robot r = RC.getRobot(i);
                 System.out.println(robot_json);
                 r.build(robot_json);
-                if(wantsKML) kml.placemark(r.getX(), r.getY(), 3);
-                if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
-                    if(r.getSpeed()<6) {
-                        System.out.println("im slow");
-                        List<node_data> path = nextStep(r);
-                        r.setMyPath((ArrayList<node_data>) path);
-                    } else {
-                        System.out.println("im speed");
-                        List<node_data> path = nextStepSpeed(r);
-                        r.setMyPath((ArrayList<node_data>) path);
-                    }
-                }
-                else if((r.getDest() == -1) && !(r.getMyPath().isEmpty())) {
-                    int key_next;
-                    key_next = r.getMyPath().get(0).getKey();
-                    r.setDest(key_next);
-                    game.chooseNextEdge(i, key_next);
-                    if(r.getMyPath().size() == 1) {
+                kml.placemark(r.getX(), r.getY(), 3);
+
+                    if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
+                        if (this.scenario_num == 0) {
+                            List<node_data> path_0 = onlyFor0(r);
+                            r.setMyPath((ArrayList<node_data>) path_0);
+                        } else {
+                           /* if (r.getSpeed() < 4) {
+                                System.out.println("im slow");
+                                List<node_data> path = nextStep(r);
+                                r.setMyPath((ArrayList<node_data>) path);
+                            } else */{
+                                System.out.println("im speed");
+                                List<node_data> path = nextStepSpeed(r);
+                                r.setMyPath((ArrayList<node_data>) path);
+                            }
+                        }
+                    } else if ((r.getDest() == -1) && !(r.getMyPath().isEmpty())) {
+                        int key_next;
+                        key_next = r.getMyPath().get(0).getKey();
+                        r.setDest(key_next);
+                        game.chooseNextEdge(i, key_next);
+                        if (r.getMyPath().size() == 1 || r.getMyPath().size() == 2) {
                         /*List<node_data> list = nextStep(r); //find the next path
                         list.add(0, r.getMyPath().get(0)); //add the node that the robot should go to
                         r.setMyPath((ArrayList<node_data>) list);*/
-                        r.setMyPath((ArrayList<node_data>) nextStep(r));
+                            r.setMyPath((ArrayList<node_data>) nextStep(r));
+                        }
+                        System.out.println("Turn to node: " + r.getDest() + "  time to end:" + (t / 1000));
+                        r.getMyPath().remove(0);
                     }
-                    System.out.println("Turn to node: " + r.getDest() + "  time to end:" + (t / 1000));
-                    r.getMyPath().remove(0);
                 }
             }
         }
-    }
+
+
+
 
     private List<node_data>  nextStepSpeed(Robot SRC) {
         System.out.println("next step speed");
@@ -464,7 +474,6 @@ public class AutoDrive implements Runnable {
                     minPath = shortPathRes;
                     res.addAll(ga.shortestPath(SRC.getSrc(), f.getSRC().getKey()));
                     res.add(f.getDEST());
-
                     chosen = f;
                     if(shortPathRes == 0) break; //to not do unnecessary iterations (0 is the minimum for sure)
                 }
@@ -519,13 +528,14 @@ public class AutoDrive implements Runnable {
         music();
         game.startGame();
         while(game.isRunning()) {
+            moveRobots();
+            paint();
             try {
-                Thread.sleep(100);
+                Thread.sleep(80);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            moveRobots();
-            paint();
+
         }
         gameOver();
         //askKML();
@@ -556,5 +566,53 @@ public class AutoDrive implements Runnable {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private List<node_data> onlyFor0(Robot r) {
+        List<node_data> temp= new ArrayList<node_data>();
+
+        temp.add(ga.getG().getNode(r.getSrc()));
+        temp.add(ga.getG().getNode(8));
+        temp.add(ga.getG().getNode(7));
+        temp.add(ga.getG().getNode(6));
+        temp.add(ga.getG().getNode(5));
+        temp.add(ga.getG().getNode(4));
+        temp.add(ga.getG().getNode(3));
+        temp.add(ga.getG().getNode(2));
+        temp.add(ga.getG().getNode(1));
+        temp.add(ga.getG().getNode(2));
+        temp.add(ga.getG().getNode(3));
+        temp.add(ga.getG().getNode(4));
+        temp.add(ga.getG().getNode(3));
+        temp.add(ga.getG().getNode(2));
+        temp.add(ga.getG().getNode(1));
+        temp.add(ga.getG().getNode(0));
+        temp.add(ga.getG().getNode(10));
+        temp.add(ga.getG().getNode(9));
+        temp.add(ga.getG().getNode(8));
+        temp.add(ga.getG().getNode(7));
+        temp.add(ga.getG().getNode(6));
+        temp.add(ga.getG().getNode(5));
+        temp.add(ga.getG().getNode(4));
+        temp.add(ga.getG().getNode(3));
+        temp.add(ga.getG().getNode(2));
+        temp.add(ga.getG().getNode(1));
+        temp.add(ga.getG().getNode(0));
+        temp.add(ga.getG().getNode(1));
+        temp.add(ga.getG().getNode(2));
+        temp.add(ga.getG().getNode(3));
+        temp.add(ga.getG().getNode(2));
+        temp.add(ga.getG().getNode(1));
+        temp.add(ga.getG().getNode(0));
+        temp.add(ga.getG().getNode(10));
+        temp.add(ga.getG().getNode(0));
+        temp.add(ga.getG().getNode(1));
+        temp.add(ga.getG().getNode(2));
+        temp.add(ga.getG().getNode(3));
+        temp.add(ga.getG().getNode(2));
+
+
+
+        return temp;
     }
 }

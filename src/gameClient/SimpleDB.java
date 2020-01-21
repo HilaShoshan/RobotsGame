@@ -22,7 +22,7 @@ public class SimpleDB {
 	public static void main(String[] args) {
 			int id1 = 999;  // "dummy existing ID  
 			int level = 0;
-			allUsers();
+			//allUsers();
 			printLog();
 			String kml = getKML(id1,level);
 			System.out.println("***** KML file example: ******");
@@ -37,12 +37,12 @@ public class SimpleDB {
 				Connection connection = 
 						DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcUserPassword);
 				Statement statement = connection.createStatement();
-				String allCustomersQuery = "SELECT * FROM Logs;";
+				String allCustomersQuery = "SELECT * FROM Logs where levelID=0";
 				ResultSet resultSet = statement.executeQuery(allCustomersQuery);
 				
 				while(resultSet.next())
 				{
-					System.out.println("Id: " + resultSet.getInt("UserID")+","+resultSet.getInt("levelID")+","+resultSet.getInt("moves")+","+resultSet.getDate("time"));
+					System.out.println("Id: " + resultSet.getInt("UserID")+","+resultSet.getInt("levelID")+","+resultSet.getInt("moves")+","+resultSet.getDate("time")+","+resultSet.getInt("score"));
 				}
 				resultSet.close();
 				statement.close();		
