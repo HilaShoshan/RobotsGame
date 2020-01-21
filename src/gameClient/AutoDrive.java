@@ -328,7 +328,6 @@ public class AutoDrive implements Runnable {
         backgroundImg();
         drawEdges();
         drawVertices();
-        System.out.println("fruit draw");
         drawFruits();
         drawRobots();
         showTime();
@@ -357,6 +356,11 @@ public class AutoDrive implements Runnable {
         game.startGame();
         music();
         while(game.isRunning()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             moveRobots();
             paint();
         }
@@ -396,9 +400,14 @@ public class AutoDrive implements Runnable {
         String gameServer = game.toString();
         try {
             JSONObject line = new JSONObject(gameServer);
+
+            System.out.println(line + "*********");
+
             double score = line.getJSONObject("GameServer").getDouble("grade");
+            int moves = line.getJSONObject(("GameServer")).getInt("moves");
             StdDraw.setPenColor(Color.WHITE);
-            StdDraw.text((maxX+minX)*0.5, 0.3*maxY+minY*0.7, "YOUR SCORE: "+score+"");
+            StdDraw.text((maxX+minX)*0.5, 0.3*maxY+minY*0.7, "YOUR SCORE: "+score+" "+"\n"+
+                    "MOVES: "+moves);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -434,8 +443,14 @@ public class AutoDrive implements Runnable {
                 r.build(robot_json);
                 kml.placemark(r.getX(), r.getY(), 3);
                 if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
-                    List<node_data> path = nextStep(r);
-                    r.setMyPath((ArrayList<node_data>) path);
+
+                    if(r.getSpeed()<4) {
+                        List<node_data> path = nextStep(r);
+                        r.setMyPath((ArrayList<node_data>) path);
+                    } else {
+                        List<node_data> path = nextStepSpeed(r);
+                        r.setMyPath((ArrayList<node_data>) path);
+                    }
                 }
                 else if((r.getDest() == -1) && !(r.getMyPath().isEmpty())) {
                     int key_next;
@@ -447,6 +462,25 @@ public class AutoDrive implements Runnable {
                 }
             }
         }
+    }
+
+    private List<node_data>  nextStepSpeed(Robot SRC) {
+        List<node_data> res = new ArrayList<node_data>();
+        double maxW = -1;
+        Iterator<Fruit> itrFruit = FC.getFC().iterator();
+        Fruit chosen = null;
+        while (itrFruit.hasNext()) {
+            Fruit f = itrFruit.next();
+            if (f.getValue() > maxW && !f.getIsVisit()) {
+                maxW = f.getValue();
+                chosen = f;
+            }
+        }
+            res.addAll(ga.shortestPath(SRC.getSrc(), chosen.getSRC().getKey()));
+            res.add(chosen.getDEST());
+
+        if(chosen != null) chosen.setIsVisit(true);
+        return res;
     }
 
     /**
@@ -470,6 +504,7 @@ public class AutoDrive implements Runnable {
                     minPath = shortPathRes;
                     res.addAll(ga.shortestPath(SRC.getSrc(), f.getSRC().getKey()));
                     res.add(f.getDEST());
+
                     chosen = f;
                     if(shortPathRes == 0) break; //to not do unnecessary iterations (0 is the minimum for sure)
                 }

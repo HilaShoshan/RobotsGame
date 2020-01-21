@@ -1,19 +1,18 @@
 package gameClient;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import Server.Game_Server;
 import Server.game_service;
 import oop_dataStructure.OOP_DGraph;
 import oop_dataStructure.oop_edge_data;
 import oop_dataStructure.oop_graph;
 import oop_utils.OOP_Point3D;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 /**
 * This class represents a simple example for using the GameServer API:
 * the main file performs the following tasks:
@@ -81,7 +80,6 @@ public class Ex4_Client implements Runnable{
 	 * in case the robot is on a node the next destination (next edge) is chosen (randomly).
 	 * @param game
 	 * @param gg
-	 * @param log
 	 */
 	private static void moveRobots(game_service game, oop_graph gg) {
 		List<String> log = game.move();
