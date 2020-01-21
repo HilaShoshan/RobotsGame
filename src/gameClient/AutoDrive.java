@@ -404,29 +404,13 @@ public class AutoDrive implements Runnable {
                 kml.placemark(r.getX(), r.getY(), 3);
 
                 if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
-                    if (this.scenario_num == 0) {
-                        List<node_data> path_0 = onlyFor0(r);
-                        r.setMyPath((ArrayList<node_data>) path_0);
-                    } else {
-                        if (r.getSpeed() < 4) {
-                            System.out.println("im slow");
-                            List<node_data> path = nextStep(r);
-                            r.setMyPath((ArrayList<node_data>) path);
-                        } else {
-                            System.out.println("im speed");
-                            List<node_data> path = nextStepSpeed(r);
-                            r.setMyPath((ArrayList<node_data>) path);
-                        }
-                    }
+                   r.setMyPath((ArrayList<node_data>) listIsEmpty( r));
                 } else if ((r.getDest() == -1) && !(r.getMyPath().isEmpty())) {
                     int key_next;
                     key_next = r.getMyPath().get(0).getKey();
                     r.setDest(key_next);
                     game.chooseNextEdge(i, key_next);
-                    if (r.getMyPath().size() == 1 || r.getMyPath().size() == 2) {
-                        /*List<node_data> list = nextStep(r); //find the next path
-                        list.add(0, r.getMyPath().get(0)); //add the node that the robot should go to
-                        r.setMyPath((ArrayList<node_data>) list);*/
+                    if (r.getMyPath().size() == 1 ) {
                         r.setMyPath((ArrayList<node_data>) nextStep(r));
                     }
                     System.out.println("Turn to node: " + r.getDest() + "  time to end:" + (t / 1000));
@@ -436,6 +420,29 @@ public class AutoDrive implements Runnable {
         }
     }
 
+    private List<node_data> listIsEmpty(Robot r){
+         /*  if (this.scenario_num == 0) {
+                        List<node_data> path_0 = onlyFor0(r);
+                        r.setMyPath((ArrayList<node_data>) path_0);
+                    } else {*/
+        if(!closeFruit(r).isEmpty()){
+            List<node_data> path = closeFruit(r);
+            r.setMyPath((ArrayList<node_data>) path);
+        }
+        else {
+            if (r.getSpeed() < 4) {
+                System.out.println("im slow");
+                List<node_data> path = nextStep(r);
+                r.setMyPath((ArrayList<node_data>) path);
+            } else {
+                System.out.println("im speed");
+                List<node_data> path = nextStepSpeed(r);
+                r.setMyPath((ArrayList<node_data>) path);
+            }
+        }
+        //}
+        return r.getMyPath();
+    }
 
 
 
@@ -495,6 +502,26 @@ public class AutoDrive implements Runnable {
 
         return res;
     }
+
+    private List<node_data> closeFruit(Robot r){
+        List<node_data> res = new ArrayList<node_data>();
+        Iterator<Fruit> itrFruit = FC.getFC().iterator();
+        while(itrFruit.hasNext()) {
+            Fruit f1 = itrFruit.next();
+            for (int i = 0; i < FC.getSize(); i++) {
+                Fruit f2 = FC.getFruit(i);
+                if (f1.getSRC() == f2.getSRC() && f1.getID() != f2.getID()) {
+                    res.addAll(ga.shortestPath(r.getSrc(), f1.getSRC().getKey()));
+                    res.add(f1.getDEST());
+                }
+            }
+
+        }
+
+          return res;
+    }
+
+
 
     /**
      * start play the background music when the game begging.
