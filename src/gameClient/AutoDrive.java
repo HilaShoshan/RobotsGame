@@ -28,6 +28,7 @@ import java.util.List;
 
 public class AutoDrive implements Runnable {
 
+    boolean wantsKML = false;
     private KML_Logger kml;
     private Thread t;
     private Graph_Algo ga;
@@ -193,6 +194,8 @@ public class AutoDrive implements Runnable {
      */
     private void init() {
         kml = new KML_Logger(this);
+        askKML();
+
         StdDraw.setCanvasSize(1000, 650);
 
         //find the scale size
@@ -232,8 +235,6 @@ public class AutoDrive implements Runnable {
      */
     private void backgroundImg() {
         StdDraw.clear();
-        //StdDraw.picture((maxX+minX)/2, (maxY+minY)/2, "data\\cityBackground.jpg", 0.05,
-               // 0.02);
         StdDraw.picture((maxX+minX)*0.5, (maxY+minY)*0.5, "data\\cityBackground.jpg");
     }
 
@@ -285,7 +286,6 @@ public class AutoDrive implements Runnable {
      */
     private void drawFruits() {
         try {
-
             List<String> log = game.getFruits();
             Iterator<String> f_iter = log.iterator();
             while (f_iter.hasNext()) {
@@ -299,10 +299,7 @@ public class AutoDrive implements Runnable {
                     StdDraw.picture(Double.parseDouble(spl[0]), Double.parseDouble(spl[1]), "data\\apple.png");
                 }
             }
-        }catch (Exception e){
-
-
-        }
+        }catch (Exception e){}
 //        System.out.println(FC.getSize());
 //        for(Fruit f : FC.getFC()) {
 //            System.out.println(f.getID());
@@ -345,36 +342,6 @@ public class AutoDrive implements Runnable {
         if(time%1000 == -1) gameOver();
     }
 
-    /**
-     * this function start the game.
-     * while the game is running, the robots will move to the next fruits
-     * and the show window draw himself all over again.
-     * when the game is end, all the data of the robots saved in KML file.
-     */
-    @Override
-    public void run() {
-        game.startGame();
-        music();
-        while(game.isRunning()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            moveRobots();
-            paint();
-        }
-        gameOver();
-        askKML();
-        String gameServer = game.toString();
-        try {
-            JSONObject line = new JSONObject(gameServer);
-            double score = line.getJSONObject("GameServer").getDouble("grade");
-            System.out.println("SCORE: "+score);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * ask if we want to keep the data in KML file.
@@ -388,28 +355,8 @@ public class AutoDrive implements Runnable {
                 JOptionPane.QUESTION_MESSAGE,
                 null, options, options[1]);
         if (n == 0) { //the answer is YES
-            kml.toKML_file();
-        }
-    }
-
-    /**
-     * draw message -game over, in the end of the game.
-     */
-    private void gameOver() {
-        StdDraw.picture((maxX+minX)*0.5, (maxY+minY)*0.5, "data\\gameOver.jpg");
-        String gameServer = game.toString();
-        try {
-            JSONObject line = new JSONObject(gameServer);
-
-            System.out.println(line + "*********");
-
-            double score = line.getJSONObject("GameServer").getDouble("grade");
-            int moves = line.getJSONObject(("GameServer")).getInt("moves");
-            StdDraw.setPenColor(Color.WHITE);
-            StdDraw.text((maxX+minX)*0.5, 0.3*maxY+minY*0.7, "YOUR SCORE: "+score+" "+"\n"+
-                    "MOVES: "+moves);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            //kml.toKML_file();
+            wantsKML = true;
         }
     }
 
@@ -426,11 +373,12 @@ public class AutoDrive implements Runnable {
             for(String s : game.getFruits()) {
                 System.out.println(s);
                 f.build(s);
-                if(f.getType() == 1) { //apple
-                    kml.placemark(f.getX(), f.getY(), 1);
-                }
-                else{ //banana
-                    kml.placemark(f.getX(), f.getY(), 2);
+                if(wantsKML) {
+                    if (f.getType() == 1) { //apple
+                        kml.placemark(f.getX(), f.getY(), 1);
+                    } else { //banana
+                        kml.placemark(f.getX(), f.getY(), 2);
+                    }
                 }
             }
         }
@@ -441,13 +389,14 @@ public class AutoDrive implements Runnable {
                 Robot r = RC.getRobot(i);
                 System.out.println(robot_json);
                 r.build(robot_json);
-                kml.placemark(r.getX(), r.getY(), 3);
+                if(wantsKML) kml.placemark(r.getX(), r.getY(), 3);
                 if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
-
-                    if(r.getSpeed()<4) {
+                    if(r.getSpeed()<6) {
+                        System.out.println("im slow");
                         List<node_data> path = nextStep(r);
                         r.setMyPath((ArrayList<node_data>) path);
                     } else {
+                        System.out.println("im speed");
                         List<node_data> path = nextStepSpeed(r);
                         r.setMyPath((ArrayList<node_data>) path);
                     }
@@ -457,6 +406,12 @@ public class AutoDrive implements Runnable {
                     key_next = r.getMyPath().get(0).getKey();
                     r.setDest(key_next);
                     game.chooseNextEdge(i, key_next);
+                    if(r.getMyPath().size() == 1) {
+                        /*List<node_data> list = nextStep(r); //find the next path
+                        list.add(0, r.getMyPath().get(0)); //add the node that the robot should go to
+                        r.setMyPath((ArrayList<node_data>) list);*/
+                        r.setMyPath((ArrayList<node_data>) nextStep(r));
+                    }
                     System.out.println("Turn to node: " + r.getDest() + "  time to end:" + (t / 1000));
                     r.getMyPath().remove(0);
                 }
@@ -465,6 +420,7 @@ public class AutoDrive implements Runnable {
     }
 
     private List<node_data>  nextStepSpeed(Robot SRC) {
+        System.out.println("next step speed");
         List<node_data> res = new ArrayList<node_data>();
         double maxW = -1;
         Iterator<Fruit> itrFruit = FC.getFC().iterator();
@@ -476,10 +432,13 @@ public class AutoDrive implements Runnable {
                 chosen = f;
             }
         }
-            res.addAll(ga.shortestPath(SRC.getSrc(), chosen.getSRC().getKey()));
-            res.add(chosen.getDEST());
+        res.addAll(ga.shortestPath(SRC.getSrc(), chosen.getSRC().getKey()));
+        res.add(chosen.getDEST());
 
+        System.out.println("************************************");
+        System.out.println(chosen.toString());
         if(chosen != null) chosen.setIsVisit(true);
+
         return res;
     }
 
@@ -490,6 +449,7 @@ public class AutoDrive implements Runnable {
      * @return the way that the robot need to do.
      */
     private List<node_data> nextStep(Robot SRC) {
+        System.out.println("next step to hell");
         double minPath = Double.POSITIVE_INFINITY;
         List<node_data> res = new ArrayList<node_data>();
         Iterator<Fruit> itrFruit = FC.getFC().iterator();
@@ -510,7 +470,10 @@ public class AutoDrive implements Runnable {
                 }
             }
        }
+        System.out.println("************************************");
+        System.out.println(chosen.toString());
         if(chosen != null) chosen.setIsVisit(true);
+
         return res;
     }
 
@@ -544,4 +507,54 @@ public class AutoDrive implements Runnable {
         MGP.start(loop);
     }
 
+
+    /**
+     * this function start the game.
+     * while the game is running, the robots will move to the next fruits
+     * and the show window draw himself all over again.
+     * when the game is end, all the data of the robots saved in KML file.
+     */
+    @Override
+    public void run() {
+        music();
+        game.startGame();
+        while(game.isRunning()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            moveRobots();
+            paint();
+        }
+        gameOver();
+        //askKML();
+        String gameServer = game.toString();
+        try {
+            JSONObject line = new JSONObject(gameServer);
+            double score = line.getJSONObject("GameServer").getDouble("grade");
+            int moves = line.getJSONObject(("GameServer")).getInt("moves");
+            System.out.println("SCORE: "+score);
+            System.out.println("MOVES: "+moves);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * draw message -game over, in the end of the game.
+     */
+    private void gameOver() {
+        StdDraw.picture((maxX+minX)*0.5, (maxY+minY)*0.5, "data\\gameOver.jpg");
+        String gameServer = game.toString();
+        try {
+            JSONObject line = new JSONObject(gameServer);
+            double score = line.getJSONObject("GameServer").getDouble("grade");
+            int moves = line.getJSONObject(("GameServer")).getInt("moves");
+            StdDraw.setPenColor(Color.WHITE);
+            StdDraw.text((maxX+minX)*0.5, 0.3*maxY+minY*0.7, "YOUR SCORE: "+score+" , MOVES: "+moves);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }

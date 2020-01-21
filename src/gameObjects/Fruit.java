@@ -140,5 +140,9 @@ public class Fruit {
         }
     }
 
+    @Override
+    public String toString() {
+        return "ID: " + this.ID + "is visit: " + this.isVisit + "weight: " + this.value;
+    }
 
 }
