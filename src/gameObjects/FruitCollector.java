@@ -15,6 +15,11 @@ public class FruitCollector {
         return this.FC.size();
     }
 
+    public void setFruit(Fruit f, int index) {
+        FC.remove(index);
+        FC.add(index, f);
+    }
+
     public void addFruit(Fruit f) {
         this.FC.add(f);
     }

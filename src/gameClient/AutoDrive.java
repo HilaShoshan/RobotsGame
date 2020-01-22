@@ -296,11 +296,16 @@ public class AutoDrive implements Runnable {
      * we took a picture of a banana and apple, and locate them in the coordinates that we get.
      */
     private void drawFruits() {
-        try {
+        //try {
             List<String> log = game.getFruits();
             Iterator<String> f_iter = log.iterator();
             while (f_iter.hasNext()) {
-                JSONObject line = new JSONObject(f_iter.next());
+                Fruit f = new Fruit(f_iter.next());
+                //FC.setFruit(f.getID(), f);
+                StdDraw.picture(f.getX(), f.getY(), f.getFileName());
+                StdDraw.text(f.getX(), f.getY(), f.getValue()+"");
+            }
+                /*JSONObject line = new JSONObject(f_iter.next());
                 String pos = line.getJSONObject("Fruit").getString("pos");
                 int type = line.getJSONObject("Fruit").getInt("type");
                 String[] spl = pos.split(",");
@@ -311,7 +316,7 @@ public class AutoDrive implements Runnable {
                     StdDraw.picture(Double.parseDouble(spl[0]), Double.parseDouble(spl[1]), "data\\apple.png");
                 }
             }
-        }catch (Exception e){}
+        }catch (Exception e){} */
 //        System.out.println(FC.getSize());
 //        for(Fruit f : FC.getFC()) {
 //            System.out.println(f.getID());
