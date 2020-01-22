@@ -403,6 +403,9 @@ public class AutoDrive implements Runnable {
                 r.build(robot_json);
                 kml.placemark(r.getX(), r.getY(), 3);
 
+               /* if(t==((t/1000)*22)) {
+                    r.setDest(Reset(r));
+                }*/
                 if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
                    r.setMyPath((ArrayList<node_data>) listIsEmpty( r));
                 } else if ((r.getDest() == -1) && !(r.getMyPath().isEmpty())) {
@@ -430,7 +433,7 @@ public class AutoDrive implements Runnable {
             r.setMyPath((ArrayList<node_data>) path);
         }
         else {
-            if (r.getSpeed() < 4) {
+            if (r.getSpeed() < 3) {
                 System.out.println("im slow");
                 List<node_data> path = nextStep(r);
                 r.setMyPath((ArrayList<node_data>) path);
@@ -519,6 +522,11 @@ public class AutoDrive implements Runnable {
         }
 
           return res;
+    }
+
+    private int Reset(Robot r){
+        r.setMyPath((ArrayList<node_data>) listIsEmpty(r));
+        return -1;
     }
 
 
@@ -634,7 +642,7 @@ public class AutoDrive implements Runnable {
             moveRobots();
             paint();
             try {
-                Thread.sleep(100);
+                Thread.sleep(80);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
