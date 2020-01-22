@@ -156,7 +156,7 @@ public class AutoDrive implements Runnable {
             }
 
             fatterMost.findEdge(this.ga.getG());
-            game.addRobot(4);
+            game.addRobot(3);
 
         }
         if (min < robotSize) { //there are more robots to locate
@@ -443,7 +443,7 @@ public class AutoDrive implements Runnable {
             r.setMyPath((ArrayList<node_data>) path);
         }
         else {*/
-            if (r.getSpeed() < 3.0) {
+            if (r.getSpeed() < 4.0) {
                 System.out.println("im slow");
                 List<node_data> path = nextStep(r);
                 r.setMyPath((ArrayList<node_data>) path);
@@ -687,7 +687,7 @@ public class AutoDrive implements Runnable {
             moveRobots();
             paint();
             try {
-                Thread.sleep(97);
+                Thread.sleep(90);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
