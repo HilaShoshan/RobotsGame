@@ -28,15 +28,15 @@ import java.util.List;
 
 public class AutoDrive implements Runnable {
 
-    //boolean wantsKML = false;
     private KML_Logger kml;
     private Thread t;
     private Graph_Algo ga;
     private game_service game;
+    private int id;
     private int scenario_num;
     private RobotCollector RC = new RobotCollector();
     private FruitCollector FC = new FruitCollector();
-    double minX,maxX,minY,maxY;
+    private double minX,maxX,minY,maxY;
 
     //getters & setters
 
@@ -239,9 +239,8 @@ public class AutoDrive implements Runnable {
     }
 
     private void askID() {
-        String s = (String)JOptionPane.showInputDialog(null,
-                "Enter Your ID to Login the game");
-        int id = Integer.parseInt(s);
+        String s = (String)JOptionPane.showInputDialog(null,"Enter Your ID to Login the game");
+        id = Integer.parseInt(s);
         Game_Server.login(id);
     }
 
@@ -378,13 +377,11 @@ public class AutoDrive implements Runnable {
             for(String s : game.getFruits()) {
                 System.out.println(s);
                 f.build(s);
-                //if(wantsKML) {
                 if (f.getType() == 1) { //apple
                     kml.placemark(f.getX(), f.getY(), 1);
                 } else { //banana
                     kml.placemark(f.getX(), f.getY(), 2);
                 }
-                //}
             }
         }
         if (log != null) {
@@ -394,13 +391,8 @@ public class AutoDrive implements Runnable {
                RC.getRobot(i).build(robot_json);
                 System.out.println(robot_json);
                 Robot r = RC.getRobot(i);
-
-               // r.build(robot_json);
+                r.build(robot_json);
                 kml.placemark(r.getX(), r.getY(), 3);
-
-               /* if(t==((t/1000)*22)) {
-                    r.setDest(Reset(r));
-                }*/
                 if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
                    r.setMyPath((ArrayList<node_data>) listIsEmpty( r));
                 } else if ((r.getDest() == -1) && !(r.getMyPath().isEmpty())) {

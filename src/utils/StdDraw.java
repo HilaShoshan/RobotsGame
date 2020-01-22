@@ -31,6 +31,8 @@ import Server.game_service;
 import algorithms.Graph_Algo;
 import dataStructure.Node;
 import dataStructure.node_data;
+import gameClient.DB_Info;
+import gameClient.KML_Logger;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -1669,12 +1671,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		}
 	}
 
-
+	public int id;
+	public KML_Logger kml;
 	/**
 	 * This method cannot be called directly.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		DB_Info db = new DB_Info(id);
 		if(e.getActionCommand() == " Save...   ") {
 			FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
 			chooser.setVisible(true);
@@ -1684,8 +1688,36 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			}
 		}
 		if(e.getActionCommand() == "Number of Games") {
-
+			int num = db.getNumGames();
+			JOptionPane.showMessageDialog(frame,"You've played " + num + " games so far");
 		}
+		if(e.getActionCommand() == "Your current Level") {
+			int level = db.getCurrLevel();
+			JOptionPane.showMessageDialog(frame,"Your current level is: " + level);
+		}
+		if(e.getActionCommand() == "Your best Score") {
+			int level = askLevel();
+			int score = db.getBestScore(level);
+			JOptionPane.showMessageDialog(frame,"Your best score is: " + score);
+		}
+		if(e.getActionCommand() == "Your Position in Class") {
+			int level = askLevel();
+			int pos = db.getPos(level);
+			JOptionPane.showMessageDialog(frame,"Your position in class is: " + level);
+		}
+		if(e.getActionCommand() == "Save KML File") {
+			kml.toKML_file();
+			JOptionPane.showMessageDialog(frame,"The KML file is saved in your project folder");
+		}
+	}
+
+	private int askLevel() {
+		Object[] possibilities = {"0","1","3","5","9","11","13","16","19","20","23"};
+        Icon icon = new ImageIcon();
+        String s = (String)JOptionPane.showInputDialog(frame,"Choose a Level...", "CHOOSE",
+                JOptionPane.PLAIN_MESSAGE, icon, possibilities, "0");
+		int level = Integer.parseInt(s);
+		return level;
 	}
 
 	/***************************************************************************
