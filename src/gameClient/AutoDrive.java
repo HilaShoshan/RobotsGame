@@ -131,6 +131,7 @@ public class AutoDrive implements Runnable {
             this.scenario_num = scenario_num;
             Game_Server.login(206554685);
             game_service game = Game_Server.getServer(scenario_num);
+
             this.game = game;
         }
     }
@@ -155,7 +156,7 @@ public class AutoDrive implements Runnable {
             }
 
             fatterMost.findEdge(this.ga.getG());
-            game.addRobot(fatterMost.getSRC().getKey());
+            game.addRobot(4);
 
         }
         if (min < robotSize) { //there are more robots to locate
@@ -403,9 +404,11 @@ public class AutoDrive implements Runnable {
             long t = game.timeToEnd();
             for (int i = 0; i < log.size(); i++) {
                 String robot_json = log.get(i);
-                Robot r = RC.getRobot(i);
+               RC.getRobot(i).build(robot_json);
                 System.out.println(robot_json);
-                r.build(robot_json);
+                Robot r = RC.getRobot(i);
+
+               // r.build(robot_json);
                 kml.placemark(r.getX(), r.getY(), 3);
 
                /* if(t==((t/1000)*22)) {
@@ -417,9 +420,11 @@ public class AutoDrive implements Runnable {
                     int key_next;
                     key_next = r.getMyPath().get(0).getKey();
                     r.setDest(key_next);
+                    if(this.scenario_num==1){
+                    if (t<38000&&t>36000) key_next=10;}
                     game.chooseNextEdge(i, key_next);
                     if (r.getMyPath().size() == 1 ) {
-                        r.setMyPath((ArrayList<node_data>) nextStep(r));
+                        r.setMyPath((ArrayList<node_data>) listIsEmpty(r));
                     }
                     System.out.println("Turn to node: " + r.getDest() + "  time to end:" + (t / 1000));
                     r.getMyPath().remove(0);
@@ -429,26 +434,31 @@ public class AutoDrive implements Runnable {
     }
 
     private List<node_data> listIsEmpty(Robot r){
-         /*  if (this.scenario_num == 0) {
+        /*  if (this.scenario_num == 0) {
                         List<node_data> path_0 = onlyFor0(r);
                         r.setMyPath((ArrayList<node_data>) path_0);
                     } else {*/
-        if(!closeFruit(r).isEmpty()){
+      /* if(!closeFruit(r).isEmpty()){
             List<node_data> path = closeFruit(r);
             r.setMyPath((ArrayList<node_data>) path);
         }
-        else {
-            if (r.getSpeed() < 3) {
+        else {*/
+            if (r.getSpeed() < 3.0) {
                 System.out.println("im slow");
                 List<node_data> path = nextStep(r);
                 r.setMyPath((ArrayList<node_data>) path);
-            } else {
-                System.out.println("im speed");
-                List<node_data> path = nextStepSpeed(r);
-                r.setMyPath((ArrayList<node_data>) path);
             }
-        }
-        //}
+            else{
+                System.out.println("im speed");
+              List<node_data> path = nextStepSpeed(r);
+               r.setMyPath((ArrayList<node_data>) path);
+
+               /* List<node_data> path = lucrativeFruit(r);
+                r.setMyPath((ArrayList<node_data>) path);*/
+          }
+     // }
+
+
         return r.getMyPath();
     }
 
@@ -462,9 +472,12 @@ public class AutoDrive implements Runnable {
         Fruit chosen = null;
         while (itrFruit.hasNext()) {
             Fruit f = itrFruit.next();
-            if (f.getValue() > maxW && !f.getIsVisit()) {
-                maxW = f.getValue();
-                chosen = f;
+            if (!f.getIsVisit()) {
+                f.findEdge(ga.getG());
+                if (f.getValue() > maxW ) {
+                    maxW = f.getValue();
+                    chosen = f;
+                }
             }
         }
         res.addAll(ga.shortestPath(SRC.getSrc(), chosen.getSRC().getKey()));
@@ -484,7 +497,7 @@ public class AutoDrive implements Runnable {
      * @return the way that the robot need to do.
      */
     private List<node_data> nextStep(Robot SRC) {
-        System.out.println("next step to hell");
+        System.out.println("next step slow");
         double minPath = Double.POSITIVE_INFINITY;
         List<node_data> res = new ArrayList<node_data>();
         Iterator<Fruit> itrFruit = FC.getFC().iterator();
@@ -516,8 +529,8 @@ public class AutoDrive implements Runnable {
         Iterator<Fruit> itrFruit = FC.getFC().iterator();
         while(itrFruit.hasNext()) {
             Fruit f1 = itrFruit.next();
-            for (int i = 0; i < FC.getSize(); i++) {
-                Fruit f2 = FC.getFruit(i);
+            for (Fruit f: FC.getFC()) {
+                Fruit f2 = f;
                 if (f1.getSRC() == f2.getSRC() && f1.getID() != f2.getID()) {
                     res.addAll(ga.shortestPath(r.getSrc(), f1.getSRC().getKey()));
                     res.add(f1.getDEST());
@@ -529,6 +542,31 @@ public class AutoDrive implements Runnable {
           return res;
     }
 
+
+  /* private List<node_data> lucrativeFruit(Robot r) {
+        ArrayList <node_data> res= new ArrayList<node_data>();
+        Iterator<Fruit> itrFruit = FC.getFC().iterator();
+        while (itrFruit.hasNext()) {
+            Fruit f = itrFruit.next();
+            if(!f.getIsVisit()) {
+                if (r.getSrc() == f.getSRC().getKey()) {
+                    res.add(f.getDEST());
+                    return res;
+                }
+                double dis = ga.shortestPathDist(r.getSrc(), f.getSRC().getKey());
+                double fValue = f.getValue();
+                double bestWay = -1;
+                if ((fValue / dis) > bestWay) {
+                    res.addAll(ga.shortestPath(r.getSrc(), f.getSRC().getKey()));
+                    res.add(f.getDEST());
+                }
+            }
+        }
+        return res;
+
+   }*/
+
+
     private int Reset(Robot r){
         r.setMyPath((ArrayList<node_data>) listIsEmpty(r));
         return -1;
@@ -539,7 +577,7 @@ public class AutoDrive implements Runnable {
     /**
      * start play the background music when the game begging.
      */
-    public static void music()
+   /* public static void music()
     {
         AudioPlayer MGP = AudioPlayer.player;
         AudioStream BGM;
@@ -565,6 +603,7 @@ public class AutoDrive implements Runnable {
         }
         MGP.start(loop);
     }
+*/
 
 
 
@@ -641,13 +680,14 @@ public class AutoDrive implements Runnable {
      */
     @Override
     public void run() {
-        music();
+        //music();
+
         game.startGame();
         while(game.isRunning()) {
             moveRobots();
             paint();
             try {
-                Thread.sleep(80);
+                Thread.sleep(97);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

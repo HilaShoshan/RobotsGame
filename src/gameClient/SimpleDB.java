@@ -21,7 +21,7 @@ public class SimpleDB {
 	 */
 	public static void main(String[] args) {
 			int id1 = 316334440;  // "real" existing ID & KML
-			int id2 = 12345678;
+			int id2 = 206554685;
 			int level = 0;//1,2,3
 			printLog(id2);
 			//allUsers();	
