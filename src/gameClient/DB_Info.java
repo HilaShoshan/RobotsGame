@@ -16,7 +16,14 @@ public class DB_Info {
     public static final String jdbcUser="student";
     public static final String jdbcUserPassword="OOP2020student";
 
-    public static int getNumGames(int id) {
+    public static int id;
+
+    //constructor
+    public DB_Info(int id) {
+        this.id = id;
+    }
+
+    public static int getNumGames() {
         int ind =0;
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -31,8 +38,36 @@ public class DB_Info {
             resultSet.close();
             statement.close();
             connection.close();
+        } catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("Vendor Error: " + sqle.getErrorCode());
         }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return ind;
+    }
 
+    public static int getCurrLevel() {
+        int ind =0;
+        int level=0;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcUserPassword);
+            Statement statement = connection.createStatement();
+            String allCustomersQuery = "SELECT * FROM Logs where userID="+id;
+            ResultSet resultSet = statement.executeQuery(allCustomersQuery);
+            while(resultSet.next()) {
+                System.out.println(ind+") Id: " + resultSet.getInt("UserID")+", level: "+resultSet.getInt("levelID")+", score: "+resultSet.getInt("score")+", moves: "+resultSet.getInt("moves")+", time: "+resultSet.getDate("time"));
+                ind++;
+                if(resultSet.getInt("levelID")>level) {
+                    level=resultSet.getInt("levelID");
+                }
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        }
         catch (SQLException sqle) {
             System.out.println("SQLException: " + sqle.getMessage());
             System.out.println("Vendor Error: " + sqle.getErrorCode());
@@ -41,6 +76,74 @@ public class DB_Info {
             e.printStackTrace();
         }
         System.out.println(ind);
-        return ind;
+        return level;
+    }
+
+    public static int getBestScore(int level) {
+        int ind = 0;
+        int bestScore = 0;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcUserPassword);
+            Statement statement = connection.createStatement();
+            String allCustomersQuery = "SELECT * FROM Logs where userID="+id;
+            ResultSet resultSet = statement.executeQuery(allCustomersQuery);
+            while(resultSet.next()) {
+                System.out.println(ind+") Id: " + resultSet.getInt("UserID")+", level: "+resultSet.getInt("levelID")+", score: "+resultSet.getInt("score")+", moves: "+resultSet.getInt("moves")+", time: "+resultSet.getDate("time"));
+                ind++;
+                if(resultSet.getInt("levelID") == level) {
+                    if(resultSet.getInt("score") > bestScore) {
+                        bestScore = resultSet.getInt("score");
+                    }
+                }
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("Vendor Error: " + sqle.getErrorCode());
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        System.out.println(ind);
+        return bestScore;
+    }
+
+    public static int getPos(int level) {
+        int ind = 0;
+        int score = 0;
+        int pos = 0;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcUserPassword);
+            Statement statement = connection.createStatement();
+            String allCustomersQuery = "SELECT * FROM Logs;";
+            ResultSet resultSet = statement.executeQuery(allCustomersQuery);
+            while(resultSet.next()) {
+                System.out.println(ind+") Id: " + resultSet.getInt("UserID")+", level: "+resultSet.getInt("levelID")+", score: "+resultSet.getInt("score")+", moves: "+resultSet.getInt("moves")+", time: "+resultSet.getDate("time"));
+                ind++;
+                if(resultSet.getInt("levelID") == level && resultSet.getInt("UserID") == id) {
+                    if(resultSet.getInt("score") > score) {
+                        score = resultSet.getInt("score");
+                        pos = ind;
+                    }
+                }
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        }
+        catch (SQLException sqle) {
+            System.out.println("SQLException: " + sqle.getMessage());
+            System.out.println("Vendor Error: " + sqle.getErrorCode());
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        System.out.println(ind);
+        return pos;
     }
 }
