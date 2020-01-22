@@ -131,7 +131,6 @@ public class AutoDrive implements Runnable {
             this.scenario_num = scenario_num;
             Game_Server.login(206554685);
             game_service game = Game_Server.getServer(scenario_num);
-
             this.game = game;
         }
     }
@@ -147,17 +146,14 @@ public class AutoDrive implements Runnable {
         Fruit fatterMost = FC.getFruit(0);
         Iterator<Fruit> fatter = FC.getFC().iterator();
         for (int i = 0; i < min; i++) {
-
             while(fatter.hasNext()) {
                 Fruit f = fatter.next();
                 if (f.getValue() > fatterMost.getValue()); {
                     fatterMost.setValue( f.getValue());
                 }
             }
-
             fatterMost.findEdge(this.ga.getG());
             game.addRobot(3);
-
         }
         if (min < robotSize) { //there are more robots to locate
             for (int i = 0; i < robotSize - min; i++) {
@@ -206,7 +202,7 @@ public class AutoDrive implements Runnable {
      */
     private void init() {
         kml = new KML_Logger(this);
-        //askKML();
+        askID();
 
         StdDraw.setCanvasSize(1000, 650);
 
@@ -240,6 +236,13 @@ public class AutoDrive implements Runnable {
 
         t = new Thread(this);
         t.start();
+    }
+
+    private void askID() {
+        String s = (String)JOptionPane.showInputDialog(null,
+                "Enter Your ID to Login the game");
+        int id = Integer.parseInt(s);
+        Game_Server.login(id);
     }
 
     /**
@@ -297,28 +300,14 @@ public class AutoDrive implements Runnable {
      * we took a picture of a banana and apple, and locate them in the coordinates that we get.
      */
     private void drawFruits() {
-        //try {
-            List<String> log = game.getFruits();
-            Iterator<String> f_iter = log.iterator();
-            while (f_iter.hasNext()) {
-                Fruit f = new Fruit(f_iter.next());
-                //FC.setFruit(f.getID(), f);
-                StdDraw.picture(f.getX(), f.getY(), f.getFileName());
-                StdDraw.text(f.getX(), f.getY(), f.getValue()+"");
-            }
-                /*JSONObject line = new JSONObject(f_iter.next());
-                String pos = line.getJSONObject("Fruit").getString("pos");
-                int type = line.getJSONObject("Fruit").getInt("type");
-                String[] spl = pos.split(",");
-                if(type==-1) {
-                    StdDraw.picture(Double.parseDouble(spl[0]), Double.parseDouble(spl[1]), "data\\banana.png");
-                    //StdDraw.text(Double.parseDouble(spl[0]), Double.parseDouble(spl[1]), );
-                } else {
-                    StdDraw.picture(Double.parseDouble(spl[0]), Double.parseDouble(spl[1]), "data\\apple.png");
-                }
-            }
-        }catch (Exception e){} */
-//        System.out.println(FC.getSize());
+        List<String> log = game.getFruits();
+        Iterator<String> f_iter = log.iterator();
+        while (f_iter.hasNext()) {
+            Fruit f = new Fruit(f_iter.next());
+            //FC.setFruit(f.getID(), f);
+            StdDraw.picture(f.getX(), f.getY(), f.getFileName());
+            StdDraw.text(f.getX(), f.getY(), f.getValue() + "");
+        }
 //        for(Fruit f : FC.getFC()) {
 //            System.out.println(f.getID());
 //            StdDraw.picture(f.getX(), f.getY(), f.getFileName());
@@ -334,7 +323,6 @@ public class AutoDrive implements Runnable {
             StdDraw.picture(r.getX(), r.getY(), r.getFileName());
         }
     }
-
 
     /**
      * paint all in the show window
@@ -359,7 +347,6 @@ public class AutoDrive implements Runnable {
         StdDraw.text((maxX+minX)*0.5, (0.1*minY+maxY*0.9), "Time Left: "+time/1000+"."+time%1000);
         if(time%1000 == -1) gameOver();
     }
-
 
     /**
      * ask if we want to keep the data in KML file.
@@ -681,7 +668,6 @@ public class AutoDrive implements Runnable {
     @Override
     public void run() {
         //music();
-
         game.startGame();
         while(game.isRunning()) {
             moveRobots();
@@ -691,7 +677,6 @@ public class AutoDrive implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
         }
         gameOver();
         //askKML();
@@ -706,4 +691,6 @@ public class AutoDrive implements Runnable {
             e.printStackTrace();
         }
     }
+
+
 }

@@ -721,6 +721,28 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		menuItem1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 		menu.add(menuItem1);
+
+		JMenu menu2 = new JMenu("DB info ");
+		menuBar.add(menu2);
+		JMenuItem myItem1 = new JMenuItem("Number of Games");
+		JMenuItem myItem2 = new JMenuItem("Your current Level");
+		JMenuItem myItem3 = new JMenuItem("Your best Score");
+		JMenuItem myItem4 = new JMenuItem("Your Position in Class");
+		myItem1.addActionListener(std);
+		myItem2.addActionListener(std);
+		myItem3.addActionListener(std);
+		myItem4.addActionListener(std);
+		menu2.add(myItem1);
+		menu2.add(myItem2);
+		menu2.add(myItem3);
+		menu2.add(myItem4);
+
+		JMenu menu3 = new JMenu("KML ");
+		menuBar.add(menu3);
+		JMenuItem kmlItem = new JMenuItem("Save KML File");
+		kmlItem.addActionListener(std);
+		menu3.add(kmlItem);
+
 		return menuBar;
 	}
 
@@ -1653,14 +1675,18 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
-		chooser.setVisible(true);
-		String filename = chooser.getFile();
-		if (filename != null) {
-			StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+		if(e.getActionCommand() == " Save...   ") {
+			FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
+			chooser.setVisible(true);
+			String filename = chooser.getFile();
+			if (filename != null) {
+				StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+			}
+		}
+		if(e.getActionCommand() == "Number of Games") {
+
 		}
 	}
-
 
 	/***************************************************************************
 	 *  Mouse interactions.
