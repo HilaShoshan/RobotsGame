@@ -186,8 +186,8 @@ public class KML_Logger {
         kml+= "</kml>";
         try {
             String filename = "";
-            if(Mgame != null) filename = "ManualGame.kml";
-            if(Agame != null) filename = "tester.kml";
+            if(Mgame != null) filename = "ManualGame/" + this.Mgame.getScenario_num() + ".kml";
+            if(Agame != null) filename = "AutoGame/" + this.Agame.getScenario_num() + ".kml";
             BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
             writer.write(kml);
             writer.close();
