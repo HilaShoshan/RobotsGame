@@ -739,11 +739,11 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		menu2.add(myItem3);
 		menu2.add(myItem4);
 
-		JMenu menu3 = new JMenu("KML ");
+		/*JMenu menu3 = new JMenu("KML ");
 		menuBar.add(menu3);
 		JMenuItem kmlItem = new JMenuItem("Save KML File");
 		kmlItem.addActionListener(std);
-		menu3.add(kmlItem);
+		menu3.add(kmlItem);*/
 
 		return menuBar;
 	}
@@ -1671,14 +1671,13 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 		}
 	}
 
-	public int id;
-	public KML_Logger kml;
+	//public int id;
+	//public KML_Logger kml;
 	/**
 	 * This method cannot be called directly.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		DB_Info db = new DB_Info(id);
 		if(e.getActionCommand() == " Save...   ") {
 			FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
 			chooser.setVisible(true);
@@ -1688,27 +1687,27 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 			}
 		}
 		if(e.getActionCommand() == "Number of Games") {
-			int num = db.getNumGames();
+			int num = DB_Info.getNumGames();
 			JOptionPane.showMessageDialog(frame,"You've played " + num + " games so far");
 		}
 		if(e.getActionCommand() == "Your current Level") {
-			int level = db.getCurrLevel();
+			int level = DB_Info.getCurrLevel();
 			JOptionPane.showMessageDialog(frame,"Your current level is: " + level);
 		}
 		if(e.getActionCommand() == "Your best Score") {
 			int level = askLevel();
-			int score = db.getBestScore(level);
+			int score = DB_Info.getBestScore(level);
 			JOptionPane.showMessageDialog(frame,"Your best score is: " + score);
 		}
 		if(e.getActionCommand() == "Your Position in Class") {
 			int level = askLevel();
-			int pos = db.getPos(level);
+			int pos = DB_Info.getPos(level);
 			JOptionPane.showMessageDialog(frame,"Your position in class is: " + level);
 		}
-		if(e.getActionCommand() == "Save KML File") {
+		/*if(e.getActionCommand() == "Save KML File") {
 			kml.toKML_file();
 			JOptionPane.showMessageDialog(frame,"The KML file is saved in your project folder");
-		}
+		}*/
 	}
 
 	private int askLevel() {

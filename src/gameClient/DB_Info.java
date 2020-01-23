@@ -18,12 +18,7 @@ public class DB_Info {
 
     public static int id;
 
-    //constructor
-    public DB_Info(int id) {
-        this.id = id;
-    }
-
-    public int getNumGames() {
+    public static int getNumGames() {
         int ind =0;
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -48,7 +43,7 @@ public class DB_Info {
         return ind;
     }
 
-    public int getCurrLevel() {
+    public static int getCurrLevel() {
         int ind =0;
         int level=0;
         try {
@@ -79,7 +74,7 @@ public class DB_Info {
         return level;
     }
 
-    public int getBestScore(int level) {
+    public static int getBestScore(int level) {
         int ind = 0;
         int bestScore = 0;
         try {
@@ -112,7 +107,7 @@ public class DB_Info {
         return bestScore;
     }
 
-    public int getPos(int level) {
+    public static int getPos(int level) {
         int ind = 0;
         int score = 0;
         int pos = 0;

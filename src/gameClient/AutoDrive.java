@@ -203,6 +203,7 @@ public class AutoDrive implements Runnable {
     private void init() {
         kml = new KML_Logger(this);
         askID();
+        DB_Info.id = this.id;
 
         StdDraw.setCanvasSize(1000, 650);
 
@@ -360,7 +361,6 @@ public class AutoDrive implements Runnable {
                 null, options, options[1]);
         if (n == 0) { //the answer is YES
             kml.toKML_file();
-            //wantsKML = true;
         }
     }
 
@@ -373,27 +373,41 @@ public class AutoDrive implements Runnable {
      */
     private void moveRobots() {
         List<String> log = game.move();
-        for(Fruit f : FC.getFC()) {
-            for(String s : game.getFruits()) {
-                System.out.println(s);
-                f.build(s);
-                if (f.getType() == 1) { //apple
-                    kml.placemark(f.getX(), f.getY(), 1);
-                } else { //banana
-                    kml.placemark(f.getX(), f.getY(), 2);
-                }
-            }
-        }
+        addPlacemarkFruit();
+
         if (log != null) {
+
+            String fruit_json = game.getFruits().get(0);
+
             long t = game.timeToEnd();
             for (int i = 0; i < log.size(); i++) {
                 String robot_json = log.get(i);
-               RC.getRobot(i).build(robot_json);
+                RC.getRobot(i).build(robot_json);
                 System.out.println(robot_json);
                 Robot r = RC.getRobot(i);
-                r.build(robot_json);
-                kml.placemark(r.getX(), r.getY(), 3);
-                if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
+                r.build(robot_json); //update the robot in the RobotCollection
+                kml.placemark(r.getX(), r.getY(), 3); //create a robot placemark on kml
+
+                if ((r.getDest() == -1)) {
+                    int key_next;
+                    //choose an algorithm, according to the current case
+                    if (FC.getSize() == 1) {
+                        key_next = case1Fruit(r);
+                        r.setDest(key_next);
+                        FC.getFruit(0).build(fruit_json);
+
+                        System.out.println("*************");
+                        System.out.println(robot_json);
+                        System.out.println(key_next);
+
+                        game.chooseNextEdge(i, key_next); //i = the id of the robot
+                    }
+                    else if(RC.getSize() == 1) {
+                        key_next = case1Robot();
+                    }
+                }
+
+                /*if ((r.getDest() == -1) && (r.getMyPath().isEmpty())) {
                    r.setMyPath((ArrayList<node_data>) listIsEmpty( r));
                 } else if ((r.getDest() == -1) && !(r.getMyPath().isEmpty())) {
                     int key_next;
@@ -407,6 +421,46 @@ public class AutoDrive implements Runnable {
                     }
                     System.out.println("Turn to node: " + r.getDest() + "  time to end:" + (t / 1000));
                     r.getMyPath().remove(0);
+                }*/
+            }
+        }
+    }
+
+    private int case1Fruit(Robot r) {
+        int res = -1;
+        node_data nextSrc = FC.getFruit(0).getSRC();
+        node_data nextDest = FC.getFruit(0).getDEST();
+        int key_dest = nextSrc.getKey();
+        if(key_dest == r.getSrc()) //if the robot is already on the source node of the Fruit
+            res = nextDest.getKey();
+        else {
+            List<node_data> path = this.ga.shortestPath(r.getSrc(), key_dest);
+            res = path.get(1).getKey();
+        }
+        if (r.getSrc() == 8 && res == 9) return 7;
+        if (r.getSrc() == 7 && res == 8) return 6;
+        if (r.getSrc() == 6 && res == 7) return 5;
+        return res;
+    }
+
+    /**
+     * method that uses shortestPath algorithm (Graph_Algo class, package algorithms)
+     * to calculate the shortest path to a fruit in the graph
+     * @return the src node
+     */
+    private int case1Robot() {
+        return 0;
+    }
+
+    private void addPlacemarkFruit() {
+        for(Fruit f : FC.getFC()) {
+            for(String s : game.getFruits()) {
+                System.out.println(s);
+                f.build(s);
+                if (f.getType() == 1) { //apple
+                    kml.placemark(f.getX(), f.getY(), 1);
+                } else { //banana
+                    kml.placemark(f.getX(), f.getY(), 2);
                 }
             }
         }
@@ -556,7 +610,7 @@ public class AutoDrive implements Runnable {
     /**
      * start play the background music when the game begging.
      */
-   /* public static void music()
+    public static void music()
     {
         AudioPlayer MGP = AudioPlayer.player;
         AudioStream BGM;
@@ -582,8 +636,6 @@ public class AutoDrive implements Runnable {
         }
         MGP.start(loop);
     }
-*/
-
 
 
     /**
@@ -603,54 +655,6 @@ public class AutoDrive implements Runnable {
         }
     }
 
-    private List<node_data> onlyFor0(Robot r) {
-        List<node_data> temp= new ArrayList<node_data>();
-
-        temp.add(ga.getG().getNode(r.getSrc()));
-        temp.add(ga.getG().getNode(8));
-        temp.add(ga.getG().getNode(7));
-        temp.add(ga.getG().getNode(6));
-        temp.add(ga.getG().getNode(5));
-        temp.add(ga.getG().getNode(4));
-        temp.add(ga.getG().getNode(3));
-        temp.add(ga.getG().getNode(2));
-        temp.add(ga.getG().getNode(1));
-        temp.add(ga.getG().getNode(2));
-        temp.add(ga.getG().getNode(3));
-        temp.add(ga.getG().getNode(4));
-        temp.add(ga.getG().getNode(3));
-        temp.add(ga.getG().getNode(2));
-        temp.add(ga.getG().getNode(1));
-        temp.add(ga.getG().getNode(0));
-        temp.add(ga.getG().getNode(10));
-        temp.add(ga.getG().getNode(9));
-        temp.add(ga.getG().getNode(8));
-        temp.add(ga.getG().getNode(7));
-        temp.add(ga.getG().getNode(6));
-        temp.add(ga.getG().getNode(5));
-        temp.add(ga.getG().getNode(4));
-        temp.add(ga.getG().getNode(3));
-        temp.add(ga.getG().getNode(2));
-        temp.add(ga.getG().getNode(1));
-        temp.add(ga.getG().getNode(0));
-        temp.add(ga.getG().getNode(1));
-        temp.add(ga.getG().getNode(2));
-        temp.add(ga.getG().getNode(3));
-        temp.add(ga.getG().getNode(2));
-        temp.add(ga.getG().getNode(1));
-        temp.add(ga.getG().getNode(0));
-        temp.add(ga.getG().getNode(10));
-        temp.add(ga.getG().getNode(0));
-        temp.add(ga.getG().getNode(1));
-        temp.add(ga.getG().getNode(2));
-        temp.add(ga.getG().getNode(3));
-        temp.add(ga.getG().getNode(2));
-
-
-
-        return temp;
-    }
-
     /**
      * this function start the game.
      * while the game is running, the robots will move to the next fruits
@@ -659,19 +663,19 @@ public class AutoDrive implements Runnable {
      */
     @Override
     public void run() {
-        //music();
+        music();
         game.startGame();
         while(game.isRunning()) {
             moveRobots();
             paint();
             try {
-                Thread.sleep(90);
+                Thread.sleep(95);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         gameOver();
-        //askKML();
+        askKML();
         String gameServer = game.toString();
         try {
             JSONObject line = new JSONObject(gameServer);
