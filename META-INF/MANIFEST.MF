@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Main-Class: 
+Class-Path: GameServer_v0.32.jar java-json.jar mysql-connector-java-5.1.
+ 47.jar junit-4.12.jar hamcrest-core-1.3.jar GameServer_v0.32.jar java-j
+ son.jar mysql-connector-java-5.1.47.jar junit-jupiter-5.4.2.jar junit-j
+ upiter-api-5.4.2.jar apiguardian-api-1.0.0.jar opentest4j-1.1.1.jar jun
+ it-platform-commons-1.4.2.jar junit-jupiter-params-5.4.2.jar junit-jupi
+ ter-engine-5.4.2.jar junit-platform-engine-1.4.2.jar
+
