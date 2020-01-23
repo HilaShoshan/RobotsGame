@@ -23,4 +23,4 @@ The main part of this assignment was to obtain a number of points as requested, 
 
 At the end of each game you can see the number of points and moves we've made, and also choose whether to save the game as a KML file.
 
-
+![matala](https://i.imgur.com/ezaiEE6.jpg)
